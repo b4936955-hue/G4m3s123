@@ -1,0 +1,4 @@
+server/.env
+server/mongo-api/.env
+server/mongo-api/node_modules/
+MONGODB.txt

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#08131f">
+  <title>UselessGamz Web</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="config.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="status-row">
+        <span class="badge">USELESSGAMZ</span>
+        <span id="deploy-status" class="status">Checking deployment…</span>
+      </div>
+
+      <h1>UselessGamz Web</h1>
+      <p class="subtitle">Search the web or open a normal URL. Some sites block embeds, so use Open tab when a page refuses to load inside the panel.</p>
+
+      <form id="search-form" class="search-box">
+        <input
+          id="search-input"
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Search or enter a URL"
+          autofocus
+        >
+        <button type="submit">Go</button>
+      </form>
+
+      <div class="engines" aria-label="Search engine">
+        <button type="button" class="engine active" data-engine="google">Google</button>
+        <button type="button" class="engine" data-engine="bing">Bing</button>
+        <button type="button" class="engine" data-engine="duckduckgo">DuckDuckGo</button>
+      </div>
+      <p id="launch-status" class="launch-status">Results open in a normal tab so blocked embed pages do not break this panel.</p>
+
+      <p class="note">
+        This Netlify build hosts the web UI. Any separate application backend should be
+        configured only for systems and networks you are authorized to use.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Deployment status</h2>
+      <pre id="health-output">Loading…</pre>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "netlify-search-ui",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npx netlify-cli dev",
+    "deploy:preview": "npx netlify-cli deploy",
+    "deploy:prod": "npx netlify-cli deploy --prod"
+  }
+}

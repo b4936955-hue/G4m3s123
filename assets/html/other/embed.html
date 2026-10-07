@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Embedder — UNBL0CKEDZ0NE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    @font-face{font-family:'ApplePixel';src:url('https://quantil.jsdelivr.net/gh/bradardeletethis/apple/font.woff2') format('woff2');font-weight:400;font-style:normal;}
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #050001;
+      --accent: #ff6600;
+      --accent-rgb: 255, 102, 0;
+      --accent-dim: rgba(var(--accent-rgb), 0.15);
+      --accent-glow: rgba(var(--accent-rgb), 0.5);
+      --accent-glow-strong: rgba(var(--accent-rgb), 0.8);
+      --accent-glow-soft: rgba(var(--accent-rgb), 0.15);
+      --panel: rgba(16, 16, 20, 0.85);
+      --border: rgba(var(--accent-rgb), 0.35);
+      --beez-gold: #ff6600;
+      --beez-gold-bright: #ff8c00;
+      --beez-gold-dark: #cc5200;
+      --text: #f4f4f5;
+      --muted: #a0a0aa;
+      --tab-bg: #0a0700;
+      --tab-active: #120b04;
+      --header-h: 52px;
+      --tab-bar-h: 44px;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 30% 70%, rgba(var(--accent-rgb), 0.10), transparent 60%),
+        radial-gradient(circle at 70% 30%, rgba(var(--accent-rgb), 0.07), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      font-family: 'ApplePixel', 'Lexend', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      height: var(--header-h);
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-shadow: 0 0 18px var(--accent-glow);
+    }
+
+    /* ── MAIN CONTENT ── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 20px;
+    }
+
+    .card {
+      background: rgba(8, 4, 0, 0.9);
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 680px;
+      box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.25), 0 8px 32px rgba(0, 0, 0, 0.6);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 35px rgba(var(--accent-rgb), 0.5);
+      border-color: var(--beez-gold-bright);
+    }
+
+    .card-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 16px var(--accent-glow);
+      margin-bottom: 6px;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    textarea#htmlInput {
+      width: 100%;
+      min-height: 240px;
+      background: #120b04;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      padding: 14px 16px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      tab-size: 2;
+    }
+
+    textarea#htmlInput::placeholder {
+      color: #2a2a2a;
+    }
+
+    textarea#htmlInput:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-family: 'Lexend', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 9px 20px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, box-shadow 0.2s, background 0.2s;
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .btn-primary {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    select {
+      background: var(--tab-active);
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 10px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .char-count {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .actions .spacer { flex: 1; }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+
+    @media (max-width: 560px) {
+      main { padding: 24px 14px; }
+      .card { padding: 24px 16px; }
+      .actions { flex-wrap: wrap; }
+    }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      background: #1a1a1a;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 10px 22px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 0 20px var(--accent-glow);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      height: 26px;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    footer span {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+    }
+
+    .sep { color: var(--border) !important; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ── UB LOOK ── */
+    .btn, .btn-primary, header h1, .card-title, .card-subtitle, label, .hint {
+      font-family: 'ApplePixel', 'Lexend', sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⚡ HTML Embedder</h1>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="card-title">HTML Embedder</div>
+      <div class="card-subtitle">Paste &amp; open in a new window</div>
+
+      <div class="toolbar">
+        <span class="toolbar-label" id="tplLabel">Template</span>
+        <select id="templateSelect" aria-labelledby="tplLabel" onchange="insertTemplate(this.value)">
+          <option value="">— pick a starting point —</option>
+          <option value="blank">Blank full page</option>
+          <option value="dark">Dark styled page</option>
+          <option value="center">Centered title page</option>
+          <option value="youtube">YouTube embed</option>
+          <option value="game">Pixel-style game card</option>
+        </select>
+        <span class="char-count" id="charCount">0 chars</span>
+      </div>
+
+      <label for="htmlInput">Your HTML Code</label>
+      <textarea id="htmlInput" placeholder="<!-- Paste your HTML here... -->" spellcheck="false"></textarea>
+
+      <div class="actions">
+        <button class="btn" onclick="copyCode()">Copy</button>
+        <button class="btn" onclick="downloadCode()">Download</button>
+        <span class="spacer"></span>
+        <button class="btn" onclick="clearInput()">Clear</button>
+        <button class="btn btn-primary" onclick="embedAndOpen()">▶ Embed &amp; Open</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <span>HTML Embedder</span>
+    <span class="sep">|</span>
+    <span>made by UNBL0CKEDZ0NE</span>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    function showToast(msg, isError = true) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.borderColor = isError ? '#f87171' : 'var(--accent)';
+      t.style.color = isError ? '#f87171' : 'var(--accent)';
+      t.style.boxShadow = isError ? '0 0 20px rgba(248,113,113,0.4)' : '0 0 20px var(--accent-glow)';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function embedAndOpen() {
+      const html = document.getElementById('htmlInput').value;
+      if (!html.trim()) {
+        showToast('⚠ Please enter some HTML code.', true);
+        return;
+      }
+      const win = window.open('', '_blank');
+      if (win) {
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+        win.focus();
+        showToast('✓ Opened in new window!', false);
+      } else {
+        showToast('✕ Pop-up blocked — please allow pop-ups.', true);
+      }
+    }
+
+    const inpEl = document.getElementById('htmlInput');
+    const STORE_KEY = 'ubHtmlEmbDraft';
+
+    function refreshCount() {
+      document.getElementById('charCount').textContent = inpEl.value.length + ' chars';
+    }
+
+    function saveDraft() {
+      try { localStorage.setItem(STORE_KEY, inpEl.value); } catch (e) {}
+    }
+
+    function clearInput() {
+      inpEl.value = '';
+      try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+      refreshCount();
+      inpEl.focus();
+    }
+
+    function copyCode() {
+      if (!inpEl.value.trim()) return showToast('⚠ Nothing to copy.', true);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(inpEl.value)
+          .then(() => showToast('✓ Copied to clipboard!', false))
+          .catch(() => showToast('✕ Could not copy — select & copy manually.', true));
+      } else {
+        inpEl.select();
+        document.execCommand('copy');
+        showToast('✓ Copied to clipboard!', false);
+      }
+    }
+
+    function downloadCode() {
+      if (!inpEl.value.trim()) return showToast('⚠ Nothing to download.', true);
+      const blob = new Blob([inpEl.value], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'embed.html';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+      showToast('✓ Downloaded embed.html', false);
+    }
+
+    const TEMPLATES = {
+      blank: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Page</title>
+</head>
+<body>
+  <h1>Hello there!</h1>
+</body>
+</html>`,
+      dark: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Page</title>
+  <style>html,body{margin:0;height:100%;background:#050001;color:#f4f4f5;font-family:sans-serif;display:flex;align-items:center;justify-content:center;flex-direction:column;}</style>
+</head>
+<body>
+  <h1>UB style</h1>
+  <p style="color:#ff6600;">Orange you glad it works?</p>
+</body>
+</html>`,
+      center: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Centered Title</title>
+  <style>html,body{margin:0;height:100%;display:grid;place-items:center;background:#eeeded;font-family:Georgia,serif;}h1{font-size:48px;}</style>
+</head>
+<body>
+  <h1>Centered</h1>
+</body>
+</html>`,
+      youtube: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube</title>
+  <style>html,body{margin:0;height:100%;background:#0f0f0f;}iframe{width:100%;height:100%;border:none;}</style>
+</head>
+<body>
+  <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+</body>
+</html>`,
+      game: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game</title>
+  <style>html,body{margin:0;height:100%;background:#050001;display:grid;place-items:center;font-family:sans-serif;}canvas{border:2px solid #ff6600;border-radius:10px;background:#120b04;}</style>
+</head>
+<body>
+  <canvas id="g" width="300" height="200"></canvas>
+  <script>
+    const c = document.getElementById('g'), x = c.getContext('2d');
+    let t = 0;
+    setInterval(() => {
+      t += 0.08;
+      x.fillStyle = '#120b04'; x.fillRect(0, 0, c.width, c.height);
+      x.fillStyle = '#ff6600';
+      x.beginPath();
+      x.arc(c.width / 2, c.height / 2, 40, 0, Math.PI * 2);
+      x.fill();
+      x.fillStyle = '#fff';
+      x.fillText('t=' + t.toFixed(1), 10, 20);
+    }, 30);
+  <\/script>
+</body>
+</html>`
+    };
+
+    function insertTemplate(v) {
+      if (!TEMPLATES[v]) return;
+      inpEl.value = TEMPLATES[v];
+      const sel = document.getElementById('templateSelect');
+      if (sel) sel.value = '';
+      saveDraft();
+      refreshCount();
+      inpEl.focus();
+    }
+
+    inpEl.addEventListener('input', () => { saveDraft(); refreshCount(); });
+
+    inpEl.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const s = inpEl.selectionStart;
+        inpEl.value = inpEl.value.substring(0, s) + '  ' + inpEl.value.substring(inpEl.selectionEnd);
+        inpEl.selectionStart = inpEl.selectionEnd = s + 2;
+        saveDraft();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') embedAndOpen();
+    });
+
+    (function initDraft() {
+      try {
+        const d = localStorage.getItem(STORE_KEY);
+        if (d != null) inpEl.value = d;
+      } catch (e) {}
+      refreshCount();
+    })();
+  </script>
+
+</body>
+</html>
