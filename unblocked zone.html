@@ -19,15 +19,15 @@
   <script>
     (async function () {
       function dec(parts) { return parts.map(function(p){ return atob(p); }).join(''); }
-      var buildRevision = '53a534e9488652d743a9c54fe63d02ea3ffb65c3';
+      var buildRevision = 'master';
       var buildVersion = 'live-' + buildRevision + '-' + Date.now();
-      var rawBaseUrl = 'https://raw.githubusercontent.com/Catchallcat5382/Unbl0ck3d-Zone-Remix-/master/assets/';
+      var rawBaseUrl = 'https://raw.githubusercontent.com/b4936955-hue/G4m3s123/master/assets/';
       var pageUrl = rawBaseUrl + 'index.html';
       var communityCssUrl = rawBaseUrl + 'community/community.css';
       var scriptFiles = ['community/config.js', 'community/community.js', 'community/auth-gate.js'];
       var fallbacks = [
-        'https://cdn.jsdelivr.net/gh/Catchallcat5382/Unbl0ck3d-Zone-Remix-@' + buildRevision + '/assets/',
-        'https://quantil.jsdelivr.net/gh/Catchallcat5382/Unbl0ck3d-Zone-Remix-@' + buildRevision + '/assets/'
+        'https://cdn.jsdelivr.net/gh/b4936955-hue/G4m3s123@' + buildRevision + '/assets/',
+        'https://quantil.jsdelivr.net/gh/b4936955-hue/G4m3s123@' + buildRevision + '/assets/'
       ];
       var baseUrl = rawBaseUrl;
       var loader = document.getElementById('loader');
