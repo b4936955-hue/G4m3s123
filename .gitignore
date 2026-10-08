@@ -6,3 +6,4 @@ server/mongo-api/
 tools/
 *.zip
 *.log
+assets/audio

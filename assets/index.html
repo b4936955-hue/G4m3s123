@@ -8381,41 +8381,34 @@ let DATA = {
 
   /* ---------- scanning ---------- */
   function scanJsDelivr() {
-    var combos = [];
-    REPOS.forEach(function (R) { ['main', 'master', 'latest'].forEach(function (v) { combos.push({ R: R, v: v }); }); });
-    function tryJsd(c) {
-      var id = 'gh/' + c.R.user + '/' + c.R.repo + '@' + c.v;
-      var urls = ['https://data.jsdelivr.com/v1/packages/' + id + '?structure=flat',
-                  'https://data.jsdelivr.com/v1/package/' + id + '/flat'];
-      return urls.reduce(function (c2, u) {
-        return c2.then(function (hit) {
-          if (hit) return hit;
-          return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-            return d && Array.isArray(d.files) && d.files.length
-              ? { R: c.R, ver: c.v, files: d.files.map(function (f) { return f.name; }) } : null;
-          }).catch(function () { return null; });
-        });
-      }, Promise.resolve(null));
-    }
-    function tryGh(c) {
-      return fetch('https://api.github.com/repos/' + c.R.user + '/' + c.R.repo + '/git/trees/' + c.v + '?recursive=1')
-        .then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-          return d && Array.isArray(d.tree) && d.tree.length
-            ? { R: c.R, ver: c.v, files: d.tree.filter(function (t) { return t.type === 'blob'; }).map(function (t) { return '/' + t.path; }) } : null;
-        }).catch(function () { return null; });
-    }
+    /* Scan EVERY repo + branch and merge, because one repo/listing may only hold a few songs. */
+    var hits = [];
     function hasAudio(res) {
       return res && res.files.some(function (p) { return /^\/(?:assets\/)?audio\//i.test(p) && AUDIO_RE.test(p); });
     }
-    function run(fn) {
-      return combos.reduce(function (chain, c) {
-        return chain.then(function (found) {
-          if (found) return found;
-          return fn(c).then(function (res) { return hasAudio(res) ? res : null; });
-        });
-      }, Promise.resolve(null));
+    function tryGh(R, v) {
+      return fetch('https://api.github.com/repos/' + R.user + '/' + R.repo + '/git/trees/' + v + '?recursive=1')
+        .then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+          return d && Array.isArray(d.tree)
+            ? { R: R, ver: v, files: d.tree.filter(function (t) { return t.type === 'blob'; }).map(function (t) { return '/' + t.path; }) } : null;
+        }).catch(function () { return null; });
     }
-    return run(tryJsd).then(function (r) { return r || run(tryGh); });
+    function tryJsd(R, v) {
+      var id = 'gh/' + R.user + '/' + R.repo + '@' + v;
+      return fetch('https://data.jsdelivr.com/v1/packages/' + id + '?structure=flat')
+        .then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+          return d && Array.isArray(d.files)
+            ? { R: R, ver: v, files: d.files.map(function (f) { return f.name; }) } : null;
+        }).catch(function () { return null; });
+    }
+    var jobs = [];
+    REPOS.forEach(function (R) {
+      ['master', 'main'].forEach(function (v) {
+        jobs.push(tryGh(R, v).then(function (res) { if (hasAudio(res)) hits.push(res); }));
+        jobs.push(tryJsd(R, v).then(function (res) { if (hasAudio(res)) hits.push(res); }));
+      });
+    });
+    return Promise.all(jobs).then(function () { return hits; });
   }
   function fromFlat(res) {
     var cdn = (typeof _cdn === 'string' && _cdn) || 'https://quantil.jsdelivr.net';
@@ -8486,7 +8479,7 @@ let DATA = {
     if (scanInfo.busy) return Promise.resolve();
     scanInfo = { busy: true, msg: 'Scanning the audio folder' };
     return Promise.all([
-      scanJsDelivr().then(function (r) { return r ? fromFlat(r) : []; }).catch(function () { return []; }),
+      scanJsDelivr().then(function (rs) { return [].concat.apply([], rs.map(fromFlat)); }).catch(function () { return []; }),
       scanListing().catch(function () { return []; }),
       loadManifests().catch(function () { return []; })
     ]).then(function (r) {
@@ -9295,11 +9288,13 @@ window.UZ_COMMUNITY_CONFIG = {
   supabaseAnonKey: '',
   authProvider: 'mongo',
   firebaseConfig: {},
-  mongoApiUrl: '',
+  // Set by the single-file loader to the public API that you deploy.
+  // There is deliberately no third-party fallback here.
+  mongoApiUrl: String(window.UZ_MONGO_API_URL || '').replace(/\/+$/, ''),
   internalAuthDomain: 'zone.local',
   ownerUsernames: '',
   ownerBypassHash: '',
-  requireLogin: false,
+  requireLogin: true,
   minNameLength: 2,
   maxNameLength: 24,
   blockedWords: ['fuck','shit','bitch','asshole','nigger','nigga','faggot','retard','cunt','kike','spic','chink','coon','whore','slut','rape','porn','sex']
@@ -10440,7 +10435,7 @@ window.UZ_ACCOUNT_DEBUG.push('config-loaded:' + window.UZ_COMMUNITY_CONFIG.mongo
     'accentColor', 'cdnMirror', 'adLayout', 'lightspeedSchoolName', 'lightspeedTopText', 'lightspeedBottomText',
     'lightspeedSystemMsg', 'scUrl', 'scHeading', 'scIp',
     'ggTitle', 'ggMessage', 'scMessage', 'scReason', 'scPolicy', 'lqGlassButtons',
-    'homeMusicTracks', 'homeMusicVolume', 'homeMusicIndex', 'homeMusicFavs', 'homeMusicShuffle', 'homeMusicRepeat', 'uzVoiceJoined',
+    'homeMusicTracks', 'homeMusicVolume', 'homeMusicIndex', 'uzVoiceJoined',
     'cloakTitle', 'cloakFavicon', 'hiddenPageCover', 'sidebarIconsOnly', 'uzRequireLogin',
     'uzNotifications', 'uzAuditLog'
   ];
