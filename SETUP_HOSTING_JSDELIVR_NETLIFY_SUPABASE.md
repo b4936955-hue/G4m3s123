@@ -2,7 +2,7 @@
 
 ## 1. GitHub
 Your repo is already pushed here:
-https://github.com/Catchallcat5382/Unbl0ck3d-Zone-Remix-
+https://github.com/b4936955-hue/G4m3s123
 
 Keep using `push.bat` after edits. The first push was huge. Future pushes should be much faster.
 
@@ -12,13 +12,13 @@ You do not create a jsDelivr account. It serves public GitHub files automaticall
 Use these URL shapes:
 
 - Main CDN host:
-  https://cdn.jsdelivr.net/gh/Catchallcat5382/Unbl0ck3d-Zone-Remix-@master/assets/index.html
+  https://cdn.jsdelivr.net/gh/b4936955-hue/G4m3s123@master/assets/index.html
 
 - Same style as the original site, using the quantil mirror:
-  https://quantil.jsdelivr.net/gh/Catchallcat5382/Unbl0ck3d-Zone-Remix-@master/assets/index.html
+  https://quantil.jsdelivr.net/gh/b4936955-hue/G4m3s123@master/assets/index.html
 
 - For always-latest asset URLs:
-  https://quantil.jsdelivr.net/gh/Catchallcat5382/Unbl0ck3d-Zone-Remix-@latest/assets/data.json
+  https://quantil.jsdelivr.net/gh/b4936955-hue/G4m3s123@latest/assets/data.json
 
 If a file is stale after pushing, purge it here:
 https://www.jsdelivr.com/tools/purge
@@ -27,7 +27,7 @@ https://www.jsdelivr.com/tools/purge
 1. Go to https://app.netlify.com/
 2. Log in with GitHub.
 3. Add new project > Import from Git.
-4. Choose `Catchallcat5382/Unbl0ck3d-Zone-Remix-`.
+4. Choose `b4936955-hue/G4m3s123`.
 5. Use:
    - Branch: `master`
    - Base directory: empty
