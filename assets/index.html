@@ -8339,7 +8339,7 @@ let DATA = {
      The scanner reads every audio file under an "audio" folder (and every
      subfolder inside it, e.g. audio/Music1/song.mp3) from this GitHub repo via
      jsDelivr. Change these two values if your repo is different. */
-  var REPO = { user: 'b4936955-hue', repo: 'G4m3s123' };
+  var REPOS = [{ user: 'b4936955-hue', repo: '123Nope' }, { user: 'b4936955-hue', repo: 'G4m3s123' }];
   var AUDIO_RE = /\.(mp3|ogg|oga|wav|m4a|aac|flac|opus|weba)$/i;
 
   var K_CUSTOM = 'homeMusicTracks', K_VOL = 'homeMusicVolume', K_FAV = 'homeMusicFavs',
@@ -8381,28 +8381,45 @@ let DATA = {
 
   /* ---------- scanning ---------- */
   function scanJsDelivr() {
-    var vers = ['main', 'master', 'latest'];
-    return vers.reduce(function (chain, v) {
-      return chain.then(function (found) {
-        if (found) return found;
-        var id = 'gh/' + REPO.user + '/' + REPO.repo + '@' + v;
-        var urls = ['https://data.jsdelivr.com/v1/packages/' + id + '?structure=flat',
-                    'https://data.jsdelivr.com/v1/package/' + id + '/flat'];
-        return urls.reduce(function (c2, u) {
-          return c2.then(function (hit) {
-            if (hit) return hit;
-            return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-              return d && Array.isArray(d.files) && d.files.length
-                ? { ver: v, files: d.files.map(function (f) { return f.name; }) } : null;
-            }).catch(function () { return null; });
-          });
-        }, Promise.resolve(null));
-      });
-    }, Promise.resolve(null));
+    var combos = [];
+    REPOS.forEach(function (R) { ['main', 'master', 'latest'].forEach(function (v) { combos.push({ R: R, v: v }); }); });
+    function tryJsd(c) {
+      var id = 'gh/' + c.R.user + '/' + c.R.repo + '@' + c.v;
+      var urls = ['https://data.jsdelivr.com/v1/packages/' + id + '?structure=flat',
+                  'https://data.jsdelivr.com/v1/package/' + id + '/flat'];
+      return urls.reduce(function (c2, u) {
+        return c2.then(function (hit) {
+          if (hit) return hit;
+          return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+            return d && Array.isArray(d.files) && d.files.length
+              ? { R: c.R, ver: c.v, files: d.files.map(function (f) { return f.name; }) } : null;
+          }).catch(function () { return null; });
+        });
+      }, Promise.resolve(null));
+    }
+    function tryGh(c) {
+      return fetch('https://api.github.com/repos/' + c.R.user + '/' + c.R.repo + '/git/trees/' + c.v + '?recursive=1')
+        .then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+          return d && Array.isArray(d.tree) && d.tree.length
+            ? { R: c.R, ver: c.v, files: d.tree.filter(function (t) { return t.type === 'blob'; }).map(function (t) { return '/' + t.path; }) } : null;
+        }).catch(function () { return null; });
+    }
+    function hasAudio(res) {
+      return res && res.files.some(function (p) { return /^\/(?:assets\/)?audio\//i.test(p) && AUDIO_RE.test(p); });
+    }
+    function run(fn) {
+      return combos.reduce(function (chain, c) {
+        return chain.then(function (found) {
+          if (found) return found;
+          return fn(c).then(function (res) { return hasAudio(res) ? res : null; });
+        });
+      }, Promise.resolve(null));
+    }
+    return run(tryJsd).then(function (r) { return r || run(tryGh); });
   }
   function fromFlat(res) {
     var cdn = (typeof _cdn === 'string' && _cdn) || 'https://quantil.jsdelivr.net';
-    var root = cdn + '/gh/' + REPO.user + '/' + REPO.repo + (/staticdelivr/.test(cdn) ? '/' : '@') + res.ver;
+    var root = cdn + '/gh/' + res.R.user + '/' + res.R.repo + (/staticdelivr/.test(cdn) ? '/' : '@') + res.ver;
     var re = /^\/(?:assets\/)?audio\/(.+)$/i, out = [];
     res.files.forEach(function (p) {
       var m = re.exec(p);
