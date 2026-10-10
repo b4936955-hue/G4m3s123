@@ -31,7 +31,9 @@
         localStorage.removeItem('uzMongoApiUrl');
         accountApiUrl = defaultApiUrl;
       }
-      if (!localStorage.getItem('uzMongoApiUrl') && isWebUrl) accountApiUrl = window.location.origin;
+      if (!localStorage.getItem('uzMongoApiUrl') && isWebUrl && window.location.origin === defaultApiUrl) {
+        accountApiUrl = window.location.origin;
+      }
       var rawBaseUrl = 'https://raw.githubusercontent.com/b4936955-hue/G4m3s123/master/assets/';
       var assetBases = isWebUrl ? [
         new URL('/assets/', window.location.href).href,
@@ -79,7 +81,7 @@
         var html = await fetchAsset('index.html');
         html = html.replace(/<style\s+id=["']static-mode["'][^>]*>[\s\S]*?<\/style>/i, '');
         html = html.replace(/<script>\s*\(function\(\)\{function u\(\)\{var b=document\.body;[\s\S]*?setInterval\(u,300\);\}\)\(\);\s*<\/script>/i, '');
-        html = html.replace(/<head([^>]*)>/i, '<head$1><script>window.UZ_MONGO_API_URL=' + JSON.stringify(accountApiUrl.replace(/\/+$/, '')) + ';<\\/script>');
+        html = html.replace(/<head([^>]*)>/i, '<head$1><script>window.UZ_MONGO_API_URL=' + JSON.stringify(accountApiUrl.replace(/\/+$/, '')) + ';<' + '/script>');
         var css = await fetchAsset('community/community.css');
         html = html.replace(/<link\s+rel=["']stylesheet["']\s+href=["']community\/community\.css["']\s*>/i, '');
         html = html.replace(/<head([^>]*)>/i, '<head$1><style id="community-inline-css">' + css.replace(/<\/style/gi, '<\\/style') + '</style>');
@@ -87,7 +89,7 @@
           var js = await fetchAsset(scriptFiles[j]);
           var escapedFile = scriptFiles[j].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           var inlinePattern = new RegExp('<script\\s+data-inline=["\\\']' + escapedFile + '["\\\'][^>]*>[\\s\\S]*?<\\/script>', 'i');
-          var inlineTag = '<script data-inline="' + scriptFiles[j] + '">' + js.replace(/<\/script/gi, '<\\/script') + '<\\/script>';
+          var inlineTag = '<script data-inline="' + scriptFiles[j] + '">' + js.replace(/<\/script/gi, '<\\/script') + '<' + '/script>';
           if (inlinePattern.test(html)) {
             html = html.replace(inlinePattern, inlineTag);
           } else {
