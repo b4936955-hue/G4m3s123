@@ -18,8 +18,17 @@
         var rawSet = Storage.prototype.setItem;
         var rawRemove = Storage.prototype.removeItem;
         var rawKey = Storage.prototype.key;
-        var shared = /^(uzLoginEmail|uzRememberMe|uzRecentAccounts|uzSessionOk|uzCommunityProfileName:|uzCommunityAvatar:|sb-|supabase\.|community\.|__|ownerBypassHash)/;
+        var shared = /^(uzLoginEmail|uzMongoToken|uzRememberMe|uzRecentAccounts|uzSessionOk|uzCommunityProfileName:|uzCommunityAvatar:|sb-|supabase\.|community\.|__|ownerBypassHash)/;
         function user() { return String(rawGet.call(localStorage, 'uzLoginEmail') || '').toLowerCase().replace(/[^a-z0-9_.-]/g, '') || ''; }
+        (function migrateMongoToken() {
+          var username = user();
+          if (!username) return;
+          var legacyKey = 'uzacct:' + username + ':uzMongoToken';
+          var legacyToken = rawGet.call(localStorage, legacyKey);
+          if (!legacyToken) return;
+          if (rawGet.call(localStorage, 'uzMongoToken') === null) rawSet.call(localStorage, 'uzMongoToken', legacyToken);
+          rawRemove.call(localStorage, legacyKey);
+        })();
         function scoped(k) {
           k = String(k || '');
           if (!k || shared.test(k) || k.indexOf('uzacct:') === 0) return k;

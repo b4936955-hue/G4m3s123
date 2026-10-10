@@ -615,6 +615,7 @@
     saveRecentAccount(username);
     clearGate();
     renderProfile(session || mongoProfileToSession(profile), profile || window.UZCurrentProfile);
+    if (typeof window.showSetupWizard === 'function' && localStorage.getItem('setupComplete') !== '1') window.showSetupWizard();
     sessionStorage.setItem('uzAccountRefresh:' + username, '1');
     if (window.UZCommunity && window.UZCommunity.refresh) {
       try { await window.UZCommunity.refresh(); } catch(e) { debugLog('community-refresh-failed', e.message || 'unknown'); }
