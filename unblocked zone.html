@@ -21,6 +21,15 @@
       var buildVersion = 'self-hosted-' + Date.now();
       var accountApiUrl = localStorage.getItem('uzMongoApiUrl') || '';
       var isWebUrl = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+      var previousApiUrls = [
+        'https://unblocked-zone.onrender.com',
+        'https://zone.onrender.com',
+        'https://bullbestyoutuber.s3.us-east-1.amazonaws.com/index.html'
+      ];
+      if (previousApiUrls.some(function (url) { return accountApiUrl.indexOf(url) === 0; })) {
+        localStorage.removeItem('uzMongoApiUrl');
+        accountApiUrl = '';
+      }
       if (!accountApiUrl && isWebUrl) accountApiUrl = window.location.origin;
       var rawBaseUrl = 'https://raw.githubusercontent.com/b4936955-hue/G4m3s123/master/assets/';
       var assetBases = isWebUrl ? [
@@ -37,6 +46,18 @@
       var baseUrl = '';
       var loader = document.getElementById('loader');
       try {
+        if (!accountApiUrl && !isWebUrl) {
+          var enteredApiUrl = window.prompt('Enter the HTTPS URL for your own Mongo API. Cancel to open the site without accounts or chat.');
+          if (enteredApiUrl) {
+            enteredApiUrl = enteredApiUrl.trim().replace(/\/+$/, '');
+            if (/^https?:\/\//i.test(enteredApiUrl)) {
+              accountApiUrl = enteredApiUrl;
+              localStorage.setItem('uzMongoApiUrl', accountApiUrl);
+            } else {
+              window.alert('The Mongo API address must start with https:// (or http:// for local testing).');
+            }
+          }
+        }
         var cacheKey = '?v=' + buildVersion;
         async function fetchAsset(file) {
           var lastError = 'No asset sources were configured.';

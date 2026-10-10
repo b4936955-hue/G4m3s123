@@ -32,6 +32,21 @@ are optional; they are not needed for the Windows Server deployment.
 
 This runs only while your computer and terminal are on.
 
+## Open the HTML file directly and use your own Mongo API
+
+You can keep opening `unblocked zone.html` directly. The HTML file is not the
+server, though: your VPS must run this project's Node API and connect it to your
+Atlas cluster. The first time the file opens without a saved API address, it
+asks for your API's public HTTPS URL and saves it in browser storage. Use the
+domain configured for Caddy below, such as `https://api.your-domain.example`.
+
+For direct `file://` use, set `ALLOWED_ORIGIN=*` in the API's
+`server/mongo-api/.env`; browsers send `Origin: null` for local files. This API
+uses bearer tokens instead of cookies. CORS is not a security boundary; keep
+the database credentials and JWT secret only on your server. Once the API is
+deployed, reopen the HTML and enter its HTTPS URL when prompted. Canceling the
+prompt opens the site without account/chat features.
+
 ## Publish from a Windows Server VPS (no Docker)
 
 1. Point a domain's DNS A record at your VPS public IP. In the VPS firewall and
