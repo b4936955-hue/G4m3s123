@@ -19,34 +19,50 @@
   <script>
     (async function () {
       var buildVersion = 'self-hosted-' + Date.now();
-      var accountApiUrl = window.location.origin;
-      var rawBaseUrl = new URL('/assets/', window.location.href).href;
-      var pageUrl = rawBaseUrl + 'index.html';
+      var accountApiUrl = localStorage.getItem('uzMongoApiUrl') || '';
+      var isWebUrl = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+      if (!accountApiUrl && isWebUrl) accountApiUrl = window.location.origin;
+      var rawBaseUrl = 'https://raw.githubusercontent.com/b4936955-hue/G4m3s123/master/assets/';
+      var assetBases = isWebUrl ? [
+        new URL('/assets/', window.location.href).href,
+        rawBaseUrl,
+        'https://cdn.jsdelivr.net/gh/b4936955-hue/G4m3s123@master/assets/',
+        'https://quantil.jsdelivr.net/gh/b4936955-hue/G4m3s123@master/assets/'
+      ] : [
+        rawBaseUrl,
+        'https://cdn.jsdelivr.net/gh/b4936955-hue/G4m3s123@master/assets/',
+        'https://quantil.jsdelivr.net/gh/b4936955-hue/G4m3s123@master/assets/'
+      ];
       var scriptFiles = ['community/config.js', 'community/community.js', 'community/auth-gate.js'];
-      var baseUrl = rawBaseUrl;
+      var baseUrl = '';
       var loader = document.getElementById('loader');
       try {
         var cacheKey = '?v=' + buildVersion;
-        var res = await fetch(pageUrl + cacheKey, { cache: 'no-store' });
-        if (!res.ok) throw new Error('Live build returned HTTP ' + res.status);
-        var html = await res.text();
+        async function fetchAsset(file) {
+          var lastError = 'No asset sources were configured.';
+          for (var i = 0; i < assetBases.length; i++) {
+            try {
+              var response = await fetch(assetBases[i] + file + cacheKey, { cache: 'no-store' });
+              if (response.ok) {
+                baseUrl = assetBases[i];
+                return await response.text();
+              }
+              lastError = file + ' returned HTTP ' + response.status;
+            } catch (fetchError) {
+              lastError = fetchError && fetchError.message ? fetchError.message : String(fetchError);
+            }
+          }
+          throw new Error('Could not load ' + file + ' from this server or the project asset mirrors. ' + lastError);
+        }
+        var html = await fetchAsset('index.html');
         html = html.replace(/<head([^>]*)>/i, '<head$1><script>window.UZ_MONGO_API_URL=' + JSON.stringify(accountApiUrl.replace(/\/+$/, '')) + ';<\\/script>');
-        var cssRes = await fetch(baseUrl + 'community/community.css' + cacheKey, { cache: 'no-store' });
-        if (!cssRes.ok) throw new Error('Community stylesheet returned HTTP ' + cssRes.status);
-        var css = await cssRes.text();
+        var css = await fetchAsset('community/community.css');
         html = html.replace(/<link\s+rel=["']stylesheet["']\s+href=["']community\/community\.css["']\s*>/i, '');
         html = html.replace(/<head([^>]*)>/i, '<head$1><style id="community-inline-css">' + css.replace(/<\/style/gi, '<\\/style') + '</style>');
         for (var j = 0; j < scriptFiles.length; j++) {
-          try {
-            var scriptUrl = baseUrl + scriptFiles[j];
-            var scriptRes = await fetch(scriptUrl + cacheKey, { cache: 'no-store' });
-            if (!scriptRes.ok) throw new Error(scriptFiles[j] + ' returned HTTP ' + scriptRes.status);
-            var js = await scriptRes.text();
-            var srcPattern = new RegExp('<script\\s+src=["\\\']' + scriptFiles[j].replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace('/', '\\/') + '["\\\']\\s*><\\/script>', 'i');
-            html = html.replace(srcPattern, '<script data-inline="' + scriptFiles[j] + '">' + js.replace(/<\/script/gi, '<\\/script') + '<\\/script>');
-          } catch (scriptErr) {
-            throw new Error('Could not load ' + scriptFiles[j] + ': ' + (scriptErr && scriptErr.message ? scriptErr.message : scriptErr));
-          }
+          var js = await fetchAsset(scriptFiles[j]);
+          var srcPattern = new RegExp('<script\\s+src=["\\\']' + scriptFiles[j].replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace('/', '\\/') + '["\\\']\\s*><\\/script>', 'i');
+          html = html.replace(srcPattern, '<script data-inline="' + scriptFiles[j] + '">' + js.replace(/<\/script/gi, '<\\/script') + '<\\/script>');
         }
         if (/<base\s/i.test(html)) html = html.replace(/<base\s[^>]*>/i, '<base href="' + baseUrl + '">');
         else html = html.replace(/<head([^>]*)>/i, '<head$1><base href="' + baseUrl + '">');
@@ -55,7 +71,7 @@
         document.close();
 } catch (err) {
   var shownApi = accountApiUrl;
-        loader.innerHTML = '<h1>Loader failed</h1><p>Could not load the site from this server.</p><p class="err">' + String(err && err.message ? err.message : err).replace(/[&<>]/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}) + '</p><p class="err">API URL: ' + shownApi.replace(/[&<>]/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}) + '</p><button onclick="location.reload()">Retry</button>';
+        loader.innerHTML = '<h1>Loader failed</h1><p>Could not load the HTML and assets. Check your internet connection or host the project assets on your server.</p><p class="err">' + String(err && err.message ? err.message : err).replace(/[&<>]/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}) + '</p><p class="err">Account API URL: ' + shownApi.replace(/[&<>]/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}) + '</p><button onclick="location.reload()">Retry</button>';
       }
     })();
   </script>
