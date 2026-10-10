@@ -85,8 +85,15 @@
         html = html.replace(/<head([^>]*)>/i, '<head$1><style id="community-inline-css">' + css.replace(/<\/style/gi, '<\\/style') + '</style>');
         for (var j = 0; j < scriptFiles.length; j++) {
           var js = await fetchAsset(scriptFiles[j]);
-          var srcPattern = new RegExp('<script\\s+src=["\\\']' + scriptFiles[j].replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace('/', '\\/') + '["\\\']\\s*><\\/script>', 'i');
-          html = html.replace(srcPattern, '<script data-inline="' + scriptFiles[j] + '">' + js.replace(/<\/script/gi, '<\\/script') + '<\\/script>');
+          var escapedFile = scriptFiles[j].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          var inlinePattern = new RegExp('<script\\s+data-inline=["\\\']' + escapedFile + '["\\\'][^>]*>[\\s\\S]*?<\\/script>', 'i');
+          var inlineTag = '<script data-inline="' + scriptFiles[j] + '">' + js.replace(/<\/script/gi, '<\\/script') + '<\\/script>';
+          if (inlinePattern.test(html)) {
+            html = html.replace(inlinePattern, inlineTag);
+          } else {
+            var srcPattern = new RegExp('<script\\s+src=["\\\'][^"\\\']*' + escapedFile + '["\\\']\\s*><\\/script>', 'i');
+            html = html.replace(srcPattern, inlineTag);
+          }
         }
         if (/<base\s/i.test(html)) html = html.replace(/<base\s[^>]*>/i, '<base href="' + baseUrl + '">');
         else html = html.replace(/<head([^>]*)>/i, '<head$1><base href="' + baseUrl + '">');
