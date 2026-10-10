@@ -36,16 +36,21 @@ This runs only while your computer and terminal are on.
 
 You can keep opening `unblocked zone.html` directly. The HTML file is not the
 server, though: your VPS must run this project's Node API and connect it to your
-Atlas cluster. The first time the file opens without a saved API address, it
-asks for your API's public HTTPS URL and saves it in browser storage. Use the
-domain configured for Caddy below, such as `https://api.your-domain.example`.
+Atlas cluster. The loader uses `https://g4m3s123-1.onrender.com` as the default
+API URL for everyone. To use a different API, save its HTTPS address in browser
+storage as described below.
 
 For direct `file://` use, set `ALLOWED_ORIGIN=*` in the API's
 `server/mongo-api/.env`; browsers send `Origin: null` for local files. This API
 uses bearer tokens instead of cookies. CORS is not a security boundary; keep
-the database credentials and JWT secret only on your server. Once the API is
-deployed, reopen the HTML and enter its HTTPS URL when prompted. Canceling the
-prompt opens the site without account/chat features.
+the database credentials and JWT secret only on your server. To set the API
+URL for your browser, open the local HTML, use the browser Console, and run:
+
+```js
+localStorage.setItem('uzMongoApiUrl', 'https://api.your-domain.example')
+```
+
+Then refresh the file.
 
 ## Publish from a Windows Server VPS (no Docker)
 
