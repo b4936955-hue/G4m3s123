@@ -80,6 +80,7 @@
         }
         var html = await fetchAsset('index.html');
         html = html.replace(/<style\s+id=["']static-mode["'][^>]*>[\s\S]*?<\/style>/i, '');
+        html = html.replace(/<style\s+id=["']no-login-gate["'][^>]*>[\s\S]*?<\/style>/i, '');
         html = html.replace(/<script>\s*\(function\(\)\{function u\(\)\{var b=document\.body;[\s\S]*?setInterval\(u,300\);\}\)\(\);\s*<\/script>/i, '');
         html = html.replace(/<head([^>]*)>/i, '<head$1><script>window.UZ_MONGO_API_URL=' + JSON.stringify(accountApiUrl.replace(/\/+$/, '')) + ';<' + '/script>');
         var css = await fetchAsset('community/community.css');
