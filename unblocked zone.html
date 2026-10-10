@@ -18,41 +18,24 @@
   </main>
   <script>
     (async function () {
-      function dec(parts) { return parts.map(function(p){ return atob(p); }).join(''); }
-      var buildRevision = 'master';
-      var buildVersion = 'live-' + buildRevision + '-' + Date.now();
-      // One-time setup: replace this with your deployed API's public URL.
-      // Once set and saved, everyone only needs to open this HTML file.
-      // Never put a MongoDB URI, password, or JWT secret here.
-      var accountApiUrl = '';
-      var rawBaseUrl = 'https://raw.githubusercontent.com/b4936955-hue/G4m3s123/master/assets/';
+      var buildVersion = 'self-hosted-' + Date.now();
+      var accountApiUrl = window.location.origin;
+      var rawBaseUrl = new URL('/assets/', window.location.href).href;
       var pageUrl = rawBaseUrl + 'index.html';
-      var communityCssUrl = rawBaseUrl + 'community/community.css';
       var scriptFiles = ['community/config.js', 'community/community.js', 'community/auth-gate.js'];
-      var fallbacks = [
-        'https://cdn.jsdelivr.net/gh/b4936955-hue/G4m3s123@' + buildRevision + '/assets/',
-        'https://quantil.jsdelivr.net/gh/b4936955-hue/G4m3s123@' + buildRevision + '/assets/'
-      ];
       var baseUrl = rawBaseUrl;
       var loader = document.getElementById('loader');
       try {
         var cacheKey = '?v=' + buildVersion;
         var res = await fetch(pageUrl + cacheKey, { cache: 'no-store' });
-        for (var i = 0; !res.ok && i < fallbacks.length; i++) {
-          res = await fetch(fallbacks[i] + 'index.html' + cacheKey, { cache: 'no-store' });
-          if (res.ok) baseUrl = fallbacks[i];
-        }
         if (!res.ok) throw new Error('Live build returned HTTP ' + res.status);
         var html = await res.text();
         html = html.replace(/<head([^>]*)>/i, '<head$1><script>window.UZ_MONGO_API_URL=' + JSON.stringify(accountApiUrl.replace(/\/+$/, '')) + ';<\\/script>');
-        try {
-            var cssRes = await fetch(baseUrl + 'community/community.css' + cacheKey, { cache: 'no-store' });
-          if (cssRes.ok) {
-            var css = await cssRes.text();
-            html = html.replace(/<link\s+rel=["']stylesheet["']\s+href=["']community\/community\.css["']\s*>/i, '');
-            html = html.replace(/<head([^>]*)>/i, '<head$1><style id="community-inline-css">' + css.replace(/<\/style/gi, '<\\/style') + '</style>');
-          }
-        } catch (cssErr) {}
+        var cssRes = await fetch(baseUrl + 'community/community.css' + cacheKey, { cache: 'no-store' });
+        if (!cssRes.ok) throw new Error('Community stylesheet returned HTTP ' + cssRes.status);
+        var css = await cssRes.text();
+        html = html.replace(/<link\s+rel=["']stylesheet["']\s+href=["']community\/community\.css["']\s*>/i, '');
+        html = html.replace(/<head([^>]*)>/i, '<head$1><style id="community-inline-css">' + css.replace(/<\/style/gi, '<\\/style') + '</style>');
         for (var j = 0; j < scriptFiles.length; j++) {
           try {
             var scriptUrl = baseUrl + scriptFiles[j];
@@ -71,8 +54,8 @@
         document.write(html);
         document.close();
 } catch (err) {
-  var shownApi = accountApiUrl || "not configured yet";
-        loader.innerHTML = '<h1>Loader failed</h1><p>The account system could not be attached to the single-file loader.</p><p class="err">' + String(err && err.message ? err.message : err).replace(/[&<>]/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}) + '</p><p class="err">API URL: ' + shownApi.replace(/[&<>]/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}) + '</p><button onclick="location.reload()">Retry</button>';
+  var shownApi = accountApiUrl;
+        loader.innerHTML = '<h1>Loader failed</h1><p>Could not load the site from this server.</p><p class="err">' + String(err && err.message ? err.message : err).replace(/[&<>]/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}) + '</p><p class="err">API URL: ' + shownApi.replace(/[&<>]/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}) + '</p><button onclick="location.reload()">Retry</button>';
       }
     })();
   </script>

@@ -1,0 +1,5 @@
+# Replace your-domain.example with the DNS name pointing at this VPS.
+your-domain.example {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:8787
+}
