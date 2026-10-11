@@ -15,25 +15,50 @@
   <main id="loader">
     <h1>Loading Unbl0cked Zone</h1>
     <p>Opening the hosted live build. This single file works without an assets folder.</p>
+    <p id="status" style="font-size:13px;opacity:.8"></p>
   </main>
   <script>
     (async function () {
       var buildVersion = 'self-hosted-' + Date.now();
-      var defaultApiUrl = 'https://g4m3s123-1.onrender.com';
-      var accountApiUrl = localStorage.getItem('uzMongoApiUrl') || defaultApiUrl;
+      var defaultApiUrl = 'https://unblocked-zone.onrender.com';
       var isWebUrl = window.location.protocol === 'http:' || window.location.protocol === 'https:';
-      var previousApiUrls = [
-        'https://unblocked-zone.onrender.com',
+      var stored = String(localStorage.getItem('uzMongoApiUrl') || '').replace('onrendered.com', 'onrender.com');
+      var oldApiUrls = [
+        'https://g4m3s123-1.onrender.com',
         'https://zone.onrender.com',
         'https://bullbestyoutuber.s3.us-east-1.amazonaws.com/index.html'
       ];
-      if (previousApiUrls.some(function (url) { return accountApiUrl.indexOf(url) === 0; })) {
+      if (oldApiUrls.some(function (url) { return stored.indexOf(url) === 0; })) {
         localStorage.removeItem('uzMongoApiUrl');
-        accountApiUrl = defaultApiUrl;
+        stored = '';
       }
-      if (!localStorage.getItem('uzMongoApiUrl') && isWebUrl && window.location.origin === defaultApiUrl) {
-        accountApiUrl = window.location.origin;
+      /* every API address worth trying, best first */
+      var apiCandidates = [stored, defaultApiUrl]
+        .map(function (u) { return String(u || '').replace(/\/+$/, ''); })
+        .filter(function (u, i, a) { return u && a.indexOf(u) === i; });
+      var accountApiUrl = apiCandidates[0];
+      if (!stored && isWebUrl && window.location.origin === defaultApiUrl) accountApiUrl = window.location.origin;
+
+      /* A blocked network fails fast; an unblocked one answers. no-cors is enough to tell the difference. */
+      async function reachable(url) {
+        var ctl = new AbortController();
+        var timer = setTimeout(function () { ctl.abort(); }, 8000);
+        try {
+          await fetch(url + '/?ping=' + Date.now(), { mode: 'no-cors', cache: 'no-store', signal: ctl.signal });
+          return true;
+        } catch (e) { return false; } finally { clearTimeout(timer); }
       }
+      var accountsOnline = false;
+      if (location.hash === '#offline') {
+        accountsOnline = false;
+      } else if (location.hash === '#online') {
+        accountsOnline = true;
+      } else {
+        for (var k = 0; k < apiCandidates.length && !accountsOnline; k++) {
+          if (await reachable(apiCandidates[k])) { accountsOnline = true; accountApiUrl = apiCandidates[k]; }
+        }
+      }
+      if (accountsOnline) localStorage.setItem('uzMongoApiUrl', accountApiUrl);
       var rawBaseUrl = 'https://raw.githubusercontent.com/b4936955-hue/G4m3s123/master/assets/';
       var assetBases = isWebUrl ? [
         new URL('/assets/', window.location.href).href,
@@ -79,9 +104,12 @@
           throw new Error('Could not load ' + file + ' from this server or the project asset mirrors. ' + lastError);
         }
         var html = await fetchAsset('index.html');
-        html = html.replace(/<style\s+id=["']static-mode["'][^>]*>[\s\S]*?<\/style>/i, '');
-        html = html.replace(/<style\s+id=["']no-login-gate["'][^>]*>[\s\S]*?<\/style>/i, '');
-        html = html.replace(/<script>\s*\(function\(\)\{function u\(\)\{var b=document\.body;[\s\S]*?setInterval\(u,300\);\}\)\(\);\s*<\/script>/i, '');
+        if (accountsOnline) {
+          /* accounts can work, so remove the "static / no login" bits of the page */
+          html = html.replace(/<style\s+id=["']static-mode["'][^>]*>[\s\S]*?<\/style>/i, '');
+          html = html.replace(/<style\s+id=["']no-login-gate["'][^>]*>[\s\S]*?<\/style>/i, '');
+          html = html.replace(/<script>\s*\(function\(\)\{function u\(\)\{var b=document\.body;[\s\S]*?setInterval\(u,300\);\}\)\(\);\s*<\/script>/i, '');
+        }
         html = html.replace(/<head([^>]*)>/i, '<head$1><script>window.UZ_MONGO_API_URL=' + JSON.stringify(accountApiUrl.replace(/\/+$/, '')) + ';<' + '/script>');
         var css = await fetchAsset('community/community.css');
         html = html.replace(/<link\s+rel=["']stylesheet["']\s+href=["']community\/community\.css["']\s*>/i, '');
