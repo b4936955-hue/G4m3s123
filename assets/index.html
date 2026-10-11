@@ -1732,10 +1732,6 @@
   <div id="custom-bg" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;background-size:cover;background-position:center;background-repeat:no-repeat;pointer-events:none;"></div>
 
 
-  <div id="console-overlay">
-    <button id="console-close" onclick="toggleConsoleOverlay()"></button>
-    <div id="luna-console"></div>
-  </div>
   <div id="uz-notification-tray" aria-hidden="true"><button id="uz-notification-toggle" type="button">Notifications <b id="uz-notification-count">0</b></button><div id="uz-notification-list" hidden></div></div>
   <div id="main-content">
     <aside id="sidebar">
@@ -1769,9 +1765,6 @@
         </button>
         <button class="sidebar-btn" data-tab="settings">
           <span class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z" /><circle cx="12" cy="12" r="3" /></svg></span><span class="sidebar-label">Settings</span>
-        </button>
-        <button class="sidebar-btn" data-tab="console" style="display:none" aria-hidden="true">
-          <span class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></span><span class="sidebar-label">Console</span>
         </button>
         <button class="sidebar-btn" id="music-btn" type="button" data-tab="music">
           <span class="icon" id="music-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></span><span class="sidebar-label" id="music-label">Music</span>
@@ -3537,7 +3530,6 @@
       </div>
       <span class="g4mes-title" id="gv-title"><span id="gv-title-text">Loading...</span></span>
       <div class="gv-right">
-        <button class="gv-btn" id="gv-console" onclick="toggleConsoleOverlay()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></button>
         <button class="gv-btn" id="gv-refresh" onclick="refreshg4mes()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M21 12C21 16.9706 16.9706 21 12 21C9.69494 21 7.59227 20.1334 6 18.7083L3 16M3 12C3 7.02944 7.02944 3 12 3C14.3051 3 16.4077 3.86656 18 5.29168L21 8M3 21V16M3 16H8M21 3V8M21 8H16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="stroke-width: 2.5;"/></svg></button>
         <button class="gv-btn" id="gv-download" onclick="downloadg4mesHTML()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"><g id="Interface / Download"><path id="Vector" d="M6 21H18M12 3V17M12 17L17 12M12 17L7 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g></svg></button>
         <button class="gv-btn" onclick="toggleg4mesFullscreen()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10 10L5 5M5 5L5 10M5 5L10 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 14L19 19M19 19V14M19 19H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -3731,7 +3723,6 @@
     <div class="ctx-title">Quick Access</div>
     <div class="ctx-item" onclick="ctxTab('settings')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z" /><circle cx="12" cy="12" r="3" /></svg> Settings</div>
     <div class="ctx-item" onclick="ctxTab('g4mes')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg> Gmes</div>
-    <div class="ctx-item" style="display:none" aria-hidden="true" onclick="ctxTab('console')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> Console</div>
   </div>
 
   <script>
@@ -5968,7 +5959,7 @@ if (/<head/i.test(html)) html = html.replace(/<head([^>]*)>/i, '<head$1>' + ytSt
       document.documentElement.classList.remove('loading-active');
     }
 
-    function toggleConsoleOverlay() {
+    function toggleConsoleOverlay() { return;
       if (window.__perfMode) return;
       var ov = document.getElementById('console-overlay');
       ov.classList.toggle('active');
@@ -9289,7 +9280,6 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;bac
   };
 })();
 </script>
-<style id="static-mode">.sidebar-btn[data-tab="community"],.sidebar-btn[data-tab="announcements"],#community,#announcements{display:none !important}</style>
   <script>window.UZ_ACCOUNT_DEBUG = window.UZ_ACCOUNT_DEBUG || []; window.UZ_ACCOUNT_DEBUG.push('inline-account-bundle-start');</script>
   <script data-inline="community/config.js">
 window.UZ_COMMUNITY_CONFIG = {
