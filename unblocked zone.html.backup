@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unbl0cked Zone Loader</title>
+  <style>
+    html,body{margin:0;min-height:100%;background:#100703;color:#ff7a1a;font-family:Arial,sans-serif}
+    body{display:grid;place-items:center}
+    main{max-width:560px;padding:28px;border:1px solid #ff6a00;border-radius:14px;background:#080506;box-shadow:0 0 36px rgba(255,106,0,.22)}
+    h1{margin:0 0 10px;font-size:24px}p{line-height:1.45;color:#ffd2a0}.err{color:#ffb4a8;white-space:pre-wrap}button{background:#ff7a1a;color:#160600;border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}
+  </style>
+</head>
+<body>
+  <main id="loader">
+    <h1>Loading Unbl0cked Zone</h1>
+    <p>Opening the hosted live build. This single file works without an assets folder.</p>
+    <p id="status" style="font-size:13px;opacity:.8"></p>
+  </main>
+  <script>
+    (async function () {
+      var buildVersion = 'self-hosted-' + Date.now();
+      var defaultApiUrl = 'https://unblocked-zone.onrender.com';
+      var isWebUrl = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+      var stored = String(localStorage.getItem('uzMongoApiUrl') || '').replace('onrendered.com', 'onrender.com');
+      var oldApiUrls = [
+        'https://g4m3s123-1.onrender.com',
+        'https://zone.onrender.com',
+        'https://bullbestyoutuber.s3.us-east-1.amazonaws.com/index.html'
+      ];
+      if (oldApiUrls.some(function (url) { return stored.indexOf(url) === 0; })) {
+        localStorage.removeItem('uzMongoApiUrl');
+        stored = '';
+      }
+      /* every API address worth trying, best first */
+      var apiCandidates = [stored, defaultApiUrl]
+        .map(function (u) { return String(u || '').replace(/\/+$/, ''); })
+        .filter(function (u, i, a) { return u && a.indexOf(u) === i; });
+      var accountApiUrl = apiCandidates[0];
+      if (!stored && isWebUrl && window.location.origin === defaultApiUrl) accountApiUrl = window.location.origin;
+
+      /* A blocked network fails fast; an unblocked one answers. no-cors is enough to tell the difference. */
+      async function reachable(url) {
+        var ctl = new AbortController();
+        var timer = setTimeout(function () { ctl.abort(); }, 8000);
+        try {
+          await fetch(url + '/?ping=' + Date.now(), { mode: 'no-cors', cache: 'no-store', signal: ctl.signal });
+          return true;
+        } catch (e) { return false; } finally { clearTimeout(timer); }
+      }
+      var accountsOnline = false;
+      if (location.hash === '#offline') {
+        accountsOnline = false;
+      } else if (location.hash === '#online') {
+        accountsOnline = true;
+      } else {
+        for (var k = 0; k < apiCandidates.length && !accountsOnline; k++) {
+          if (await reachable(apiCandidates[k])) { accountsOnline = true; accountApiUrl = apiCandidates[k]; }
+        }
+      }
+      if (accountsOnline) localStorage.setItem('uzMongoApiUrl', accountApiUrl);
+      var rawBaseUrl = 'https://raw.githubusercontent.com/b4936955-hue/G4m3s123/master/assets/';
+      var assetBases = isWebUrl ? [
+        new URL('/assets/', window.location.href).href,
+        rawBaseUrl,
+        'https://cdn.jsdelivr.net/gh/b4936955-hue/G4m3s123@master/assets/',
+        'https://quantil.jsdelivr.net/gh/b4936955-hue/G4m3s123@master/assets/'
+      ] : [
+        rawBaseUrl,
+        'https://cdn.jsdelivr.net/gh/b4936955-hue/G4m3s123@master/assets/',
+        'https://quantil.jsdelivr.net/gh/b4936955-hue/G4m3s123@master/assets/'
+      ];
+      var scriptFiles = ['community/config.js', 'community/community.js', 'community/auth-gate.js'];
+      var baseUrl = '';
+      var loader = document.getElementById('loader');
+      try {
+        if (!accountApiUrl && !isWebUrl) {
+          var enteredApiUrl = window.prompt('Enter the HTTPS URL for your own Mongo API. Cancel to open the site without accounts or chat.');
+          if (enteredApiUrl) {
+            enteredApiUrl = enteredApiUrl.trim().replace(/\/+$/, '');
+            if (/^https?:\/\//i.test(enteredApiUrl)) {
+              accountApiUrl = enteredApiUrl;
+              localStorage.setItem('uzMongoApiUrl', accountApiUrl);
+            } else {
+              window.alert('The Mongo API address must start with https:// (or http:// for local testing).');
+            }
+          }
+        }
+        var cacheKey = '?v=' + buildVersion;
+        async function fetchAsset(file) {
+          var lastError = 'No asset sources were configured.';
+          for (var i = 0; i < assetBases.length; i++) {
+            try {
+              var response = await fetch(assetBases[i] + file + cacheKey, { cache: 'no-store' });
+              if (response.ok) {
+                baseUrl = assetBases[i];
+                return await response.text();
+              }
+              lastError = file + ' returned HTTP ' + response.status;
+            } catch (fetchError) {
+              lastError = fetchError && fetchError.message ? fetchError.message : String(fetchError);
+            }
+          }
+          throw new Error('Could not load ' + file + ' from this server or the project asset mirrors. ' + lastError);
+        }
+        var html = await fetchAsset('index.html');
+        if (accountsOnline) {
+          /* accounts can work, so remove the "static / no login" bits of the page */
+          html = html.replace(/<style\s+id=["']static-mode["'][^>]*>[\s\S]*?<\/style>/i, '');
+          html = html.replace(/<style\s+id=["']no-login-gate["'][^>]*>[\s\S]*?<\/style>/i, '');
+          html = html.replace(/<script>\s*\(function\(\)\{function u\(\)\{var b=document\.body;[\s\S]*?setInterval\(u,300\);\}\)\(\);\s*<\/script>/i, '');
+        }
+        html = html.replace(/<head([^>]*)>/i, '<head$1><script>window.UZ_MONGO_API_URL=' + JSON.stringify(accountApiUrl.replace(/\/+$/, '')) + ';<' + '/script>');
+        var css = await fetchAsset('community/community.css');
+        html = html.replace(/<link\s+rel=["']stylesheet["']\s+href=["']community\/community\.css["']\s*>/i, '');
+        html = html.replace(/<head([^>]*)>/i, '<head$1><style id="community-inline-css">' + css.replace(/<\/style/gi, '<\\/style') + '</style>');
+        for (var j = 0; j < scriptFiles.length; j++) {
+          var js = await fetchAsset(scriptFiles[j]);
+          var escapedFile = scriptFiles[j].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          var inlinePattern = new RegExp('<script\\s+data-inline=["\\\']' + escapedFile + '["\\\'][^>]*>[\\s\\S]*?<\\/script>', 'i');
+          var inlineTag = '<script data-inline="' + scriptFiles[j] + '">' + js.replace(/<\/script/gi, '<\\/script') + '<' + '/script>';
+          if (inlinePattern.test(html)) {
+            html = html.replace(inlinePattern, inlineTag);
+          } else {
+            var srcPattern = new RegExp('<script\\s+src=["\\\'][^"\\\']*' + escapedFile + '["\\\']\\s*><\\/script>', 'i');
+            html = html.replace(srcPattern, inlineTag);
+          }
+        }
+        if (/<base\s/i.test(html)) html = html.replace(/<base\s[^>]*>/i, '<base href="' + baseUrl + '">');
+        else html = html.replace(/<head([^>]*)>/i, '<head$1><base href="' + baseUrl + '">');
+        document.open();
+        document.write(html);
+        document.close();
+} catch (err) {
+  var shownApi = accountApiUrl;
+        loader.innerHTML = '<h1>Loader failed</h1><p>Could not load the HTML and assets. Check your internet connection or host the project assets on your server.</p><p class="err">' + String(err && err.message ? err.message : err).replace(/[&<>]/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}) + '</p><p class="err">Account API URL: ' + shownApi.replace(/[&<>]/g, function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}) + '</p><button onclick="location.reload()">Retry</button>';
+      }
+    })();
+  </script>
+</body>
+</html>

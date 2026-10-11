@@ -20,7 +20,11 @@
   <script>
     (async function () {
       var buildVersion = 'self-hosted-' + Date.now();
-      var defaultApiUrl = 'https://unblocked-zone.onrender.com';
+      // Simplified API selection - matches the working remix approach
+      var accountApiUrl = localStorage.getItem('uzMongoApiUrl') || 'https://unblocked-zone.onrender.com';
+      // Remove trailing slashes for consistency
+      accountApiUrl = String(accountApiUrl).replace(/\/+$/, '');
+
       var isWebUrl = window.location.protocol === 'http:' || window.location.protocol === 'https:';
       var stored = String(localStorage.getItem('uzMongoApiUrl') || '').replace('onrendered.com', 'onrender.com');
       var oldApiUrls = [
@@ -33,11 +37,11 @@
         stored = '';
       }
       /* every API address worth trying, best first */
-      var apiCandidates = [stored, defaultApiUrl]
+      var apiCandidates = [stored, accountApiUrl]
         .map(function (u) { return String(u || '').replace(/\/+$/, ''); })
         .filter(function (u, i, a) { return u && a.indexOf(u) === i; });
-      var accountApiUrl = apiCandidates[0];
-      if (!stored && isWebUrl && window.location.origin === defaultApiUrl) accountApiUrl = window.location.origin;
+      accountApiUrl = apiCandidates[0];
+      if (!stored && isWebUrl && window.location.origin === accountApiUrl) accountApiUrl = window.location.origin;
 
       /* A blocked network fails fast; an unblocked one answers. no-cors is enough to tell the difference. */
       async function reachable(url) {
@@ -46,8 +50,7 @@
         try {
           await fetch(url + '/?ping=' + Date.now(), { mode: 'no-cors', cache: 'no-store', signal: ctl.signal });
           return true;
-        } catch (e) { return false; } finally { clearTimeout(timer); }
-      }
+        } catch (e) { return false; } finally { clearTimeout(timer); } }
       var accountsOnline = false;
       if (location.hash === '#offline') {
         accountsOnline = false;
@@ -110,7 +113,7 @@
           html = html.replace(/<style\s+id=["']no-login-gate["'][^>]*>[\s\S]*?<\/style>/i, '');
           html = html.replace(/<script>\s*\(function\(\)\{function u\(\)\{var b=document\.body;[\s\S]*?setInterval\(u,300\);\}\)\(\);\s*<\/script>/i, '');
         }
-        html = html.replace(/<head([^>]*)>/i, '<head$1><script>window.UZ_MONGO_API_URL=' + JSON.stringify(accountApiUrl.replace(/\/+$/, '')) + ';<' + '/script>');
+        html = html.replace(/<head([^>]*)>/i, '<head$1><script>window.UZ_MONGO_API_URL=' + JSON.stringify(accountApiUrl) + ';<' + '/script>');
         var css = await fetchAsset('community/community.css');
         html = html.replace(/<link\s+rel=["']stylesheet["']\s+href=["']community\/community\.css["']\s*>/i, '');
         html = html.replace(/<head([^>]*)>/i, '<head$1><style id="community-inline-css">' + css.replace(/<\/style/gi, '<\\/style') + '</style>');
